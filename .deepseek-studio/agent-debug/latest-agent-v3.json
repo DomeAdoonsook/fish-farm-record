@@ -1,0 +1,9 @@
+{
+  "coreVersion": "V3",
+  "style": "copilot",
+  "mode": "copilot",
+  "readOnly": false,
+  "userRequest": "ช่วย publish โปรเจกต์นี้ขึ้น GitHub ให้หน่อย ทำตาม GITHUB PUBLISH WORKFLOW ทั้งหมด: เช็คว่า login GitHub CLI (gh) อยู่หรือยัง ถ้ายังให้เริ่ม device login แล้วใช้ process_wait รอจน login เสร็จ (Studio จะแสดงโค้ดให้ผู้ใช้เองในแถบสถานะและเปิดเบราว์เซอร์ให้) จากนั้น init/commit ถ้ายังไม่มี .git, สร้าง repo บน GitHub แล้ว push โค้ดขึ้นไป, เปิดใช้งาน GitHub Pages ให้ด้วย แล้วสรุปให้ทั้งลิงก์ repo และลิงก์เว็บ Pages ที่เปิดดูได้จริงตอนท้าย สำคัญ: ห้ามใช้ run_command หรือ Shell fallback กับคำสั่ง gh/git ใดๆ ในงานนี้เด็ดขาด ให้ใช้ process_start เท่านั้น เพราะ run_command จะรอจนคำสั่งจบก่อนถึงจะคืนผล ทำให้ไม่เห็น device code ระหว่างที่ gh auth login กำลังรออยู่",
+  "explicitlyNamedProjectFiles": [],
+  "timestamp": "2026-09-29T15:09:48.5833878Z"
+}

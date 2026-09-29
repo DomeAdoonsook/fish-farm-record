@@ -1,0 +1,12 @@
+{
+  "id": "20260929-130747-682c8af1e879428cb1499610190120e1",
+  "created": "2026-09-29T06:09:02.8649843Z",
+  "label": "สร้าง/ปรับหน้า Overview ของโปรเจกต์นี้เป็น Interactive 3D Dashboard\n\nข้อกำหนด:\n- ตรวจไฟล์ในโปรเจกต์ก่อนและใช้โครงสร้างเดิมถ้ามี\n- ใช้ Three.js เมื่อเหมาะสม\n- ทำ Scene แบบ industrial / SCADA ที่อ่านข้อมูลง่าย ไม่ใช่ 3D เพื่อความสวยอย่างเดียว\n- แยก Rendering ออกจาก Data/State เพื่อให้ภายหลังต่อ PLC, MQTT, Web API หรือ Database ได้\n- รองรับ Resize และ Live Preview\n- ใช้วัตถุ procedural ก่อน ไม่ต้องโหลด GLB/GLTF ภายนอกถ้ายังไม่มี\n- มี camera/control ที่ใช้งานง่าย\n- สร้าง material, light และ shadow ให้ดูเป็นงาน Dashboard มืออาชีพ\n- ถ้ามีรูปแนบ ให้ยึดมุมกล้อง รูปทรง การจัดวาง สี วัสดุ และแสงจากรูปเป็นหลัก\n- อย่าลบฟังก์ชันเดิมที่ยังใช้งานอยู่\n\nเริ่มจากอ่านไฟล์ที่เกี่ยวข้อง แล้วลงมือแก้ไฟล์ให้ Preview ใช้งานได้จริง",
+  "items": [
+    {
+      "path": "fish-farm-record.html",
+      "existed": true,
+      "backup": "74ee8a49ed7941c3f9448f70439b93df663de79f9b3507b14c15225bcca65c78.bak"
+    }
+  ]
+}

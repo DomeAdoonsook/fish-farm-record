@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบบันทึกการเลี้ยงปลา | Fish Farm Record System</title>
+<style>
+  :root{
+    --bg:#0b1e2d;
+    --bg2:#0f2a3d;
+    --panel:#12314a;
+    --panel2:#163a57;
+    --line:#1e4d6b;
+    --txt:#e6f3ff;
+    --muted:#8fb4cc;
+    --accent:#25c2a0;
+    --accent2:#1aa3ff;
+    --warn:#ffb020;
+    --danger:#ff5d5d;
+    --ok:#39d98a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",Tahoma,"Leelawadee UI",sans-serif;
+    background:radial-gradient(1200px 600px at 10% -10%,#143f5c 0%,transparent 60%),
+               radial-gradient(900px 500px at 100% 0%,#0d4a44 0%,transparent 55%),
+               var(--bg);
+    color:var(--txt);
+    min-height:100vh;
+    padding:18px;
+  }
+  .wrap{max-width:1200px;margin:0 auto}
+
+  /* ---------- Header ---------- */
+  header.top{
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;
+    background:linear-gradient(135deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{
+    width:52px;height:52px;border-radius:14px;
+    display:grid;place-items:center;font-size:28px;
+    background:linear-gradient(135deg,#25c2a0,#1aa3ff);
+    box-shadow:0 6px 18px rgba(37,194,160,.35);
+  }
+  .brand h1{font-size:20px;line-height:1.25}
+  .brand p{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .clock{font-size:13px;color:var(--muted);text-align:right}
+  .clock b{display:block;font-size:22px;color:var(--accent);letter-spacing:1px}
+
+  /* ---------- Tabs ---------- */
+  nav.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  nav.tabs button{
+    cursor:pointer;font:inherit;font-size:14px;
+    padding:10px 16px;border-radius:11px;
+    border:1px solid var(--line);
+    background:var(--panel);color:var(--muted);
+    transition:.18s;
+  }
+  nav.tabs button:hover{color:var(--txt);border-color:var(--accent2);transform:translateY(-1px)}
+  nav.tabs button.active{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#04222b;font-weight:700;border-color:transparent;
+    box-shadow:0 6px 18px rgba(26,163,255,.3);
+  }
+
+  /* ---------- Cards ---------- */
+  .page{display:none}
+  .page.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .grid{display:grid;gap:14px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .card{
+    background:linear-gradient(160deg,var(--panel),#0f2c42);
+    border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;position:relative;overflow:hidden;
+  }
+  .card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent)}
+  .card.blue:before{background:var(--accent2)}
+  .card.warn:before{background:var(--warn)}
+  .card.danger:before{background:var(--danger)}
+  .card .k{font-size:12.5px;color:var(--muted)}
+  .card .v{font-size:26px;font-weight:700;margin:6px 0 2px}
+  .card .s{font-size:12px;color:var(--muted)}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px;margin-top:14px;
+  }
+  .panel h2{font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .panel h2 span.dot{width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block}
+
+  /* ---------- Form ---------- */
+  .form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:12.5px;color:var(--muted)}
+  .field.full{grid-column:1/-1}
+  input,select,textarea{
+    font:inherit;font-size:14px;
+    background:#0a2334;color:var(--txt);
+    border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;outline:none;transition:.15s;width:100%;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,194,160,.15)}
+  textarea{resize:vertical;min-height:70px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  button.btn{
+    cursor:pointer;font:inherit;font-size:14px;font-weight:600;
+    padding:10px 18px;border-radius:10px;border:1px solid transparent;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04222b;transition:.18s;
+  }
+  button.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  button.btn.ghost{background:transparent;border-color:var(--line);color:var(--txt)}
+  button.btn.ghost:hover{border-color:var(--accent)}
+  button.btn.red{background:linear-gradient(135deg,#ff6b6b,#e0392f);color:#fff}
+  button.btn.sm{padding:6px 12px;font-size:12.5px;border-radius:8px}
+
+  /* ---------- Table ---------- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
+  thead th{
+    background:#0d2a40;color:var(--muted);font-weight:600;font-size:12.5px;
+    text-align:left;padding:11px 12px;white-space:nowrap;
+    position:sticky;top:0;
+  }
+  tbody td{padding:10px 12px;border-top:1px solid #143750;vertical-align:middle}
+  tbody tr:hover{background:#123b57}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600}
+  .pill.ok{background:rgba(57,217,138,.15);color:var(--ok)}
+  .pill.warn{background:rgba(255,176,32,.15);color:var(--warn)}
+  .pill.bad{background:rgba(255,93,93,.15);color:var(--danger)}
+  .pill.info{background:rgba(26,163,255,.15);color:var(--accent2)}
+  .empty{padding:34px;text-align:center;color:var(--muted);font-size:14px}
+
+  .bar{height:8px;border-radius:999px;background:#0a2334;overflow:hidden;min-width:90px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+
+  .toast{
+    position:fixed;right:20px;bottom:20px;z-index:99;
+    background:linear-gradient(135deg,#25c2a0,#1aa3ff);color:#04222b;
+    font-weight:700;font-size:14px;padding:13px 20px;border-radius:12px;
+    box-shadow:0 12px 30px rgba(0,0,0,.45);
+    transform:translateY(120%);opacity:0;transition:.35s;
+  }
+  .toast.show{transform:none;opacity:1}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .row.between{justify-content:space-between}
+  .hint{font-size:12px;color:var(--muted)}
+  @media(max-width:640px){
+    body{padding:10px}
+    .brand h1{font-size:17px}
+    .clock{text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🐟</div>
+      <div>
+        <h1>ระบบบันทึกการเลี้ยงปลา</h1>
+        <p>Fish Farm Record System • บันทึก บ่อ อาหาร น้ำหนัก และสุขภาพปลา</p>
+      </div>
+    </div>
+    <div class="clock">
+      <b id="clock">--:--:--</b>
+      <span id="today"></span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="dash">📊 แดชบอร์ด</button>
+    <button data-tab="pond">🌊 บ่อเลี้ยง</button>
+    <button data-tab="feed">🍚 บันทึกให้อาหาร</button>
+    <button data-tab="grow">📈 วัดการเจริญเติบโต</button>
+    <button data-tab="health">🩺 สุขภาพ/การตาย</button>
+    <button data-tab="water">💧 คุณภาพน้ำ</button>
+    <button data-tab="data">💾 ข้อมูล</button>
+  </nav>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="page active" id="page-dash">
+    <div class="grid cards">
+      <div class="card">
+        <div class="k">จำนวนบ่อทั้งหมด</div>
+        <div class="v" id="s-pon">0</div>
+        <div class="s" id="s-pon-sub">ยังไม่มีข้อมูล</div>
+      </div>
+      <div class="card blue">
+        <div class="k">ปลารวม (ตัว)</div>
+        <div class="v" id="s-fish">0</div>
+        <div class="s" id="s-fish-sub">ประมาณการคงเหลือ</div>
+      </div>
+      <div class="card warn">
+        <div class="k">อาหารรวมที่ใช้ (กก.)</div>
+        <div class="v" id="s-feed">0</div>
+        <div class="s" id="s-feed-sub">จากบันทึกให้อาหาร</div>
+      </div>
+      <div class="card danger">
+        <div class="k">ปลาตายสะสม (ตัว)</div>
+        <div class="v" id="s-die">0</div>
+        <div class="s" id="s-die-sub">อัตราการตาย 0%</div>
+      </div>
+      <div class="card blue">
+        <div class="k">FCR รวม</div>
+        <div class="v" id="s-fcr">-</div>
+        <div class="s">อาหาร ÷ น้ำหนักที่เพิ่ม</div>
+      </div>
+      <div class="card">
+        <div class="k">บันทึกล่าสุด</div>
+        <div class="v" id="s-last" style="font-size:18px">-</div>
+        <div class="s" id="s-last-sub">ยังไม่มีบันทึก</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>สรุปสถานะบ่อเลี้ยง</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>บ่อ</th><th>ชนิดปลา</th><th>จำนวนปล่อย</th><th>คงเหลือ (ประมาณ)</th>
+              <th>น้ำหนักเฉลี่ย</th><th>อาหารที่ใช้</th><th>อัตรารอด</th><th>สถานะ</th>
+            </tr>
+          </thead>
+          <tbody id="dash-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="dash-empty">ยังไม่มีข้อมูลบ่อเลี้ยง — ไปที่แท็บ “บ่อเลี้ยง” เพื่อเพิ่มข้อมูล</div>
+    </div>
+  </section>
+
+  <!-- ============ PONDS ============ -->
+  <section class="page" id="page-pon">
+    <div class="panel">
+      <h2><span class="dot"></span>เพิ่ม / แก้ไขข้อมูลบ่อเลี้ยง</h2>
+      <form class="form" id="form-pon">
+        <input type="hidden" id="pon-id">
+        <div class="field">
+          <label>รหัส/ชื่อบ่อ *</label>
+          <input id="pon-name" placeholder="เช่น บ่อ 1, บ่อหน้าบ้าน" required>
+        </div>
+        <div class="field">
+          <label>ชนิดปลา *</label>
+          <input id="pon-species" list="species-list" placeholder="เช่น ปลานิล, ปลาดุก" required>
+          <datalist id="species-list">
+            <option value="ปลานิล"><option value="ปลาดุก"><option value="ปลาตะเพียน">
+            <option value="ปลากระพง"><option value="ปลาทับทิม"><option value="ปลาไน">
+            <option value="ปลาเผาะ"><option value="กุ้งกุลาดำ">
+          </datalist>
+        </div>
+        <div class="field">
+          <label>ขนาดบ่อ</label>
+          <input id="pon-area" type="number" step="0.01" min="0" placeholder="เช่น 500 (ตร.ม.)">
+        </div>
+        <div class="field">
+          <label>จำนวนปล่อย (ตัว) *</label>
+          <input id="pon-qty" type="number" min="0" placeholder="เช่น 2000" required>
+        </div>
+        <div class="field">
+          <label>น้ำหนักปล่อยเริ่มต้น (กรัม/ตัว)</label>
+          <input id="pon-w0" type="number" step="0.1" min="0" placeholder="เช่น 5">
+        </div>
+        <div class="field">
+          <label>วันที่ปล่อยพันธุ์</label>
+          <input id="pon-date" type="date">
+        </div>
+        <div class="field full">
+          <label>หมายเหตุ</label>
+          <textarea id="pon-note" placeholder="รายละเอียดเพิ่มเติม เช่น แหล่งพันธุ์ปลา, ระบบน้ำ"></textarea>
+        </div>
+      </form>
+      <div class="actions">
+        <button class="btn" id="pon-save">💾 บันทึกบ่อ</button>
+        <button class="btn ghost" id="pon-reset">↺ ล้างฟอร์ม</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>รายการบ่อเลี้ยง</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>รหัสบ่อ</th><th>ชนิดปลา</th><th>ขนาด (ตร.ม.)</th><th>จำนวนปล่อย</th>
+            <th>น้ำหนักเริ่ม (ก.)</th><th>วันที่ปล่อย</th><th>หมายเหตุ</th><th>จัดการ</th></tr>
+          </thead>
+          <tbody id="pon-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="pon-empty">ยังไม่มีบ่อเลี้ยง</div>
+    </div>
+  </section>
+
+  <!-- ============ FEED ============ -->
+  <section class="page" id="page-feed">
+    <div class="panel">
+      <h2><span class="dot"></span>บันทึกการให้อาหาร</h2>
+      <form class="form" id="form-feed">
+        <input type="hidden" id="feed-id">
+        <div class="field">
+          <label>บ่อ *</label>
+          <select id="feed-pon" required></select>
+        </div>
+        <div class="field">
+          <label>วันที่ *</label>
+          <input id="feed-date" type="date" required>
+        </div>
+        <div class="field">
+          <label>มื้ออาหาร</label>
+          <select id="feed-meal">
+            <option>เช้า</option><option>กลางวัน</option><option>เย็น</option><option>อื่นๆ</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>ชนิด/ยี่ห้ออาหาร</label>
+          <input id="feed-brand" placeholder="เช่น อาหารเม็ดลอย 30% โปรตีน">
+        </div>
+        <div class="field">
+          <label>ปริมาณ (กก.) *</label>
+          <input id="feed-qty" type="number" step="0.01" min="0" placeholder="เช่น 2.5" required>
+        </div>
+        <div class="field">
+          <label>ราคารวม (บาท)</label>
+          <input id="feed-cost" type="number" step="0.01" min="0" placeholder="เช่น 120">
+        </div>
+        <div class="field full">
+          <label>หมายเหตุ</label>
+          <input id="feed-note" placeholder="เช่น ปลากินอาหารดี, ลดอาหารเพราะฝนตก">
+        </div>
+      </form>
+      <div class="actions">
+        <button class="btn" id="feed-save">💾 บันทึกอาหาร</button>
+        <button class="btn ghost" id="feed-reset">↺ ล้างฟอร์ม</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>ประวัติการให้อาหาร <span class="hint" id="feed-sum"></span></h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>วันที่</th><th>บ่อ</th><th>มื้อ</th><th>อาหาร</th><th>ปริมาณ (กก.)</th>
+            <th>ราคา (บาท)</th><th>หมายเหตุ</th><th>จัดการ</th></tr>
+          </thead>
+          <tbody id="feed-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="feed-empty">ยังไม่มีบันทึกการให้อาหาร</div>
+    </div>
+  </section>
+
+  <!-- ============ GROWTH ============ -->
+  <section class="page" id="page-grow">
+    <div class="panel">
+      <h2><span class="dot"></span>บันทึกการเจริญเติบโต (ชั่งน้ำหนัก / นับจำนวน)</h2>
+      <form class="form" id="form-grow">
+        <input type="hidden" id="grow-id">
+        <div class="field">
+          <label>บ่อ *</label>
+          <select id="grow-pon" required></select>
+        </div>
+        <div class="field">
+          <label>วันที่ *</label>
+          <input id="grow-date" type="date" required>
+        </div>
+        <div class="field">
+          <label>น้ำหนักเฉลี่ย (กรัม/ตัว) *</label>
+          <input id="grow-w" type="number" step="0.1" min="0" placeholder="เช่น 120" required>
+        </div>
+        <div class="field">
+          <label>จำนวนปลาในบ่อ (ตัว)</label>
+          <input id="grow-qty" type="number" min="0" placeholder="นับจริงถ้ามี">
+        </div>
+        <div class="field">
+          <label>ความยาวเฉลี่ย (ซม.)</label>
+          <input id="grow-len" type="number" step="0.1" min="0" placeholder="เช่น 18">
+        </div>
+        <div class="field full">
+          <label>หมายเหตุ</label>
+          <input id="grow-note" placeholder="เช่น สุ่มชั่ง 20 ตัว">
+        </div>
+      </form>
+      <div class="actions">
+        <button class="btn" id="grow-save">💾 บันทึกการเติบโต</button>
+        <button class="btn ghost" id="grow-reset">↺ ล้างฟอร์ม</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>ประวัติการเจริญเติบโต</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>วันที่</th><th>บ่อ</th><th>น้ำหนักเฉลี่ย (ก.)</th><th>ความยาว (ซม.)</th>
+            <th>จำนวน (ตัว)</th><th>ชีวมวลรวม (กก.)</th><th>หมายเหตุ</th><th>จัดการ</th></tr>
+          </thead>
+          <tbody id="grow-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="grow-empty">ยังไม่มีบันทึกการเจริญเติบโต</div>
+    </div>
+  </section>
+
+  <!-- ============ HEALTH ============ -->
+  <section class="page" id="page-health">
+    <div class="panel">
+      <h2><span class="dot"></span>บันทึกสุขภาพ / การตายของปลา</h2>
+      <form class="form" id="form-health">
+        <input type="hidden" id="health-id">
+        <div class="field">
+          <label>บ่อ *</label>
+          <select id="health-pon" required></select>
+        </div>
+        <div class="field">
+          <label>วันที่ *</label>
+          <input id="health-date" type="date" required>
+        </div>
+        <div class="field">
+          <label>ประเภทเหตุการณ์</label>
+          <select id="health-type">
+            <option value="ตาย">ปลาตาย</option>
+            <option value="ป่วย">พบปลาป่วย</option>
+            <option value="รักษา">ให้ยา/รักษา</option>
+            <option value="คัดแยก">คัดแยก/ย้ายบ่อ</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>จำนวน (ตัว)</label>
+          <input id="health-qty" type="number" min="0" placeholder="เช่น 15">
+        </div>
+        <div class="field">
+          <label>สาเหตุ/อาการ</label>
+          <input id="health-cause" placeholder="เช่น ติดเชื้อเหงือก, ขาดออกซิเจน">
+        </div>
+        <div class="field">
+          <label>การแก้ไข</label>
+          <input id="health-fix" placeholder="เช่น ลดอาหาร, เปลี่ยนน้ำ 30%">
+        </div>
+        <div class="field full">
+          <label>หมายเหตุ</label>
+          <input id="health-note" placeholder="รายละเอียดเพิ่มเติม">
+        </div>
+      </form>
+      <div class="actions">
+        <button class="btn" id="health-save">💾 บันทึกสุขภาพ</button>
+        <button class="btn ghost" id="health-reset">↺ ล้างฟอร์ม</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>ประวัติสุขภาพปลา</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>วันที่</th><th>บ่อ</th><th>ประเภท</th><th>จำนวน</th><th>สาเหตุ/อาการ</th>
+            <th>การแก้ไข</th><th>หมายเหตุ</th><th>จัดการ</th></tr>
+          </thead>
+          <tbody id="health-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="health-empty">ยังไม่มีบันทึกสุขภาพ</div>
+    </div>
+  </section>
+
+  <!-- ============ WATER ============ -->
+  <section class="page" id="page-water">
+    <div class="panel">
+      <h2><span class="dot"></span>บันทึกคุณภาพน้ำ</h2>
+      <form class="form" id="form-water">
+        <input type="hidden" id="water-id">
+        <div class="field">
+          <label>บ่อ *</label>
+          <select id="water-pon" required></select>
+        </div>
+        <div class="field">
+          <label>วันที่/เวลา *</label>
+          <input id="water-date" type="datetime-local" required>
+        </div>
+        <div class="field">
+          <label>อุณหภูมิน้ำ (°C)</label>
+          <input id="water-temp" type="number" step="0.1" placeholder="เช่น 29">
+        </div>
+        <div class="field">
+          <label>ค่า pH</label>
+          <input id="water-ph" type="number" step="0.01" placeholder="เช่น 7.2">
+        </div>
+        <div class="field">
+          <label>ออกซิเจนละลาย DO (mg/L)</label>
+          <input id="water-do" type="number" step="0.01" placeholder="เช่น 5.5">
+        </div>
+        <div class="field">
+          <label>แอมโมเนีย NH₃ (mg/L)</label>
+          <input id="water-nh3" type="number" step="0.01" placeholder="เช่น 0.2">
+        </div>
+        <div class="field full">
+          <label>หมายเหตุ</label>
+          <input id="water-note" placeholder="เช่น ฝนตกหนัก, เปลี่ยนน้ำ 20%">
+        </div>
+      </form>
+      <div class="actions">
+        <button class="btn" id="water-save">💾 บันทึกคุณภาพน้ำ</button>
+        <button class="btn ghost" id="water-reset">↺ ล้างฟอร์ม</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>ประวัติคุณภาพน้ำ</h2>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>วัน/เวลา</th><th>บ่อ</th><th>อุณหภูมิ</th><th>pH</th><th>DO</th><th>NH₃</th>
+            <th>สถานะน้ำ</th><th>หมายเหตุ</th><th>จัดการ</th></tr>
+          </thead>
+          <tbody id="water-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="water-empty">ยังไม่มีบันทึกคุณภาพน้ำ</div>
+    </div>
+  </section>
+
+  <!-- ============ DATA ============ -->
+  <section class="page" id="page-data">
+    <div class="panel">
+      <h2><span class="dot"></span>จัดการข้อมูล (บันทึกในเบราว์เซอร์ของคุณ)</h2>
+      <p class="hint">
+        ข้อมูลทั้งหมดถูกเก็บไว้ใน LocalStorage ของเบราว์เซอร์นี้ ไม่ถูกส่งออกไปภายนอก
+        แนะนำให้สำรองข้อมูล (Export JSON) เป็นระยะ เพื่อความปลอดภัย
+      </p>
+      <div class="actions">
+        <button class="btn" id="btn-export">⬇ ส่งออก JSON</button>
+        <button class="btn ghost" id="btn-import">⬆ นำเข้า JSON</button>
+        <button class="btn ghost" id="btn-csv">📄 ส่งออก CSV</button>
+        <button class="btn ghost" id="btn-print">🖨 พิมพ์รายงาน</button>
+        <button class="btn red" id="btn-clear">🗑 ล้างข้อมูลทั้งหมด</button>
+      </div>
+      <input type="file" id="file-import" accept=".json,application/json" style="display:none">
+      <div class="row" style="margin-top:14px">
+        <span class="pill info" id="count-pon">บ่อ: 0</span>
+        <span class="pill info" id="count-feed">อาหาร: 0</span>
+        <span class="pill info" id="count-grow">เติบโต: 0</span>
+        <span class="pill info" id="count-health">สุขภาพ: 0</span>
+        <span class="pill info" id="count-water">น้ำ: 0</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="dot"></span>รายงานสรุปสำหรับพิมพ์</h2>
+      <div id="print-area" class="hint">กดปุ่ม “พิมพ์รายงาน” เพื่อสร้างรายงานสรุปจากข้อมูลจริง</div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast">บันทึกเรียบร้อย</div>
+
+<script>
+/* ================= Storage layer ================= */
+const KEY = 'fishFarmRecord.v1';
+const emptyDB = () => ({ pon:[], feed:[], grow:[], health:[], water:[] });
+let DB = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return emptyDB();
+    const d = JSON.parse(raw);
+    return Object.assign(emptyDB(), d);
+  }catch(e){
+    console.warn('อ่านข้อมูลไม่สำเร็จ', e);
+    return emptyDB();
+  }
+}
+function save(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(DB));
+  }catch(e){
+    toast('บันทึกไม่สำเร็จ: พื้นที่จัดเก็บเต็ม');
+    console.error(e);
+  }
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+/* ================= Utilities ================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const fmt = (n,d=2) => Number(num(n)).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:d});
+const todayStr = () => new Date().toLocaleDateString('sv-SE');
+const nowLocal = () => { const d=new Date(); const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+const ponName = id => (DB.pon.find(p=>p.id===id)?.name) || '(ไม่ระบุบ่อ)';
+
+/* ================= Clock ================= */
+function tick(){
+  const d = new Date();
+  $('#clock').textContent = d.toLocaleTimeString('th-TH',{hour12:false});
+  $('#today').textContent = d.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+tick(); setInterval(tick, 1000);
+
+/* ================= Tabs ================= */
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('page-' + b.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================= Pond form ================= */
+$('#pon-save').addEventListener('click', e=>{
+  e.preventDefault();
+  const name = $('#pon-name').value.trim();
+  const species = $('#pon-species').value.trim();
+  const qty = $('#pon-qty').value;
+  if(!name || !species || qty === ''){ toast('กรอก รหัสบ่อ / ชนิดปลา / จำนวนปล่อย ให้ครบ'); return; }
+  const id = $('#pon-id').value;
+  const rec = {
+    id: id || uid(),
+    name, species,
+    area: num($('#pon-area').value),
+    qty: num(qty),
+    w0: num($('#pon-w0').value),
+    date: $('#pon-date').value,
+    note: $('#pon-note').value.trim()
+  };
+  if(id){
+    const i = DB.pon.findIndex(p=>p.id===id);
+    DB.pon[i] = rec;
+  } else {
+    DB.pon.push(rec);
+  }
+  save(); resetPon(); renderAll(); toast(id ? 'แก้ไขข้อมูลบ่อแล้ว' : 'เพิ่มบ่อเลี้ยงแล้ว');
+});
+$('#pon-reset').addEventListener('click', e=>{ e.preventDefault(); resetPon(); });
+function resetPon(){
+  $('#form-pon').reset(); $('#pon-id').value = '';
+  $('#pon-date').value = todayStr();
+  $('#pon-save').textContent = '💾 บันทึกบ่อ';
+}
+
+/* ================= Feed form ================= */
+$('#feed-save').addEventListener('click', e=>{
+  e.preventDefault();
+  if(!DB.pon.length){ toast('เพิ่มบ่อเลี้ยงก่อนบันทึกอาหาร'); return; }
+  const pon = $('#feed-pon').value, date = $('#feed-date').value, qty = $('#feed-qty').value;
+  if(!pon || !date || qty === ''){ toast('เลือกบ่อ / วันที่ / ปริมาณอาหาร ให้ครบ'); return; }
+  const id = $('#feed-id').value;
+  const rec = {
+    id: id || uid(), pon, date,
+    meal: $('#feed-meal').value,
+    brand: $('#feed-brand').value.trim(),
+    qty: num(qty),
+    cost: num($('#feed-cost').value),
+    note: $('#feed-note').value.trim()
+  };
+  if(id){ DB.feed[DB.feed.findIndex(x=>x.id===id)] = rec; } else { DB.feed.push(rec); }
+  save(); resetFeed(); renderAll(); toast(id ? 'แก้ไขบันทึกอาหารแล้ว' : 'บันทึกการให้อาหารแล้ว');
+});
+$('#feed-reset').addEventListener('click', e=>{ e.preventDefault(); resetFeed(); });
+function resetFeed(){
+  $('#form-feed').reset(); $('#feed-id').value = '';
+  $('#feed-date').value = todayStr();
+  if(DB.pon.length) $('#feed-pon').value = DB.pon[0].id;
+  $('#feed-save').textContent = '💾 บันทึกอาหาร';
+}
+
+/* ================= Growth form ================= */
+$('#grow-save').addEventListener('click', e=>{
+  e.preventDefault();
+  if(!DB.pon.length){ toast('เพิ่มบ่อเลี้ยงก่อนบันทึกการเติบโต'); return; }
+  const pon = $('#grow-pon').value, date = $('#grow-date').value, w = $('#grow-w').value;
+  if(!pon || !date || w === ''){ toast('เลือกบ่อ / วันที่ / น้ำหนัก ให้ครบ'); return; }
+  const id = $('#grow-id').value;
+  const rec = {
+    id: id || uid(), pon, date,
+    w: num(w),
+    qty: num($('#grow-qty').value),
+    len: num($('#grow-len').value),
+    note: $('#grow-note').value.trim()
+  };
+  if(id){ DB.grow[DB.grow.findIndex(x=>x.id===id)] = rec; } else { DB.grow.push(rec); }
+  save(); resetGrow(); renderAll(); toast(id ? 'แก้ไขบันทึกการเติบโตแล้ว' : 'บันทึกการเติบโตแล้ว');
+});
+$('#grow-reset').addEventListener('click', e=>{ e.preventDefault(); resetGrow(); });
+function resetGrow(){
+  $('#form-grow').reset(); $('#grow-id').value = '';
+  $('#grow-date').value = todayStr();
+  if(DB.pon.length) $('#grow-pon').value = DB.pon[0].id;
+  $('#grow-save').textContent = '💾 บันทึกการเติบโต';
+}
+
+/* ================= Health form ================= */
+$('#health-save').addEventListener('click', e=>{
+  e.preventDefault();
+  if(!DB.pon.length){ toast('เพิ่มบ่อเลี้ยงก่อนบันทึกสุขภาพ'); return; }
+  const pon = $('#health-pon').value, date = $('#health-date').value;
+  if(!pon || !date){ toast('เลือกบ่อ / วันที่ ให้ครบ'); return; }
+  const id = $('#health-id').value;
+  const rec = {
+    id: id || uid(), pon, date,
+    type: $('#health-type').value,
+    qty: num($('#health-qty').value),
+    cause: $('#health-cause').value.trim(),
+    fix: $('#health-fix').value.trim(),
+    note: $('#health-note').value.trim()
+  };
+  if(id){ DB.health[DB.health.findIndex(x=>x.id===id)] = rec; } else { DB.health.push(rec); }
+  save(); resetHealth(); renderAll(); toast(id ? 'แก้ไขบันทึกสุขภาพแล้ว' : 'บันทึกสุขภาพแล้ว');
+});
+$('#health-reset').addEventListener('click', e=>{ e.preventDefault(); resetHealth(); });
+function resetHealth(){
+  $('#form-health').reset(); $('#health-id').value = '';
+  $('#health-date').value = todayStr();
+  if(DB.pon.length) $('#health-pon').value = DB.pon[0].id;
+  $('#health-save').textContent = '💾 บันทึกสุขภาพ';
+}
+
+/* ================= Water form ================= */
+$('#water-save').addEventListener('click', e=>{
+  e.preventDefault();
+  if(!DB.pon.length){ toast('เพิ่มบ่อเลี้ยงก่อนบันทึกคุณภาพน้ำ'); return; }
+  const pon = $('#water-pon').value, date = $('#water-date').value;
+  if(!pon || !date){ toast('เลือกบ่อ / วันที่-เวลา ให้ครบ'); return; }
+  const id = $('#water-id').value;
+  const rec = {
+    id: id || uid(), pon, date,
+    temp: $('#water-temp').value === '' ? null : num($('#water-temp').value),
+    ph:   $('#water-ph').value   === '' ? null : num($('#water-ph').value),
+    do:   $('#water-do').value   === '' ? null : num($('#water-do').value),
+    nh3:  $('#water-nh3').value  === '' ? null : num($('#water-nh3').value),
+    note: $('#water-note').value.trim()
+  };
+  if(id){ DB.water[DB.water.findIndex(x=>x.id===id)] = rec; } else { DB.water.push(rec); }
+  save(); resetWater(); renderAll(); toast(id ? 'แก้ไขบันทึกคุณภาพน้ำแล้ว' : 'บันทึกคุณภาพน้ำแล้ว');
+});
+$('#water-reset').addEventListener('click', e=>{ e.preventDefault(); resetWater(); });
+function resetWater(){
+  $('#form-water').reset(); $('#water-id').value = '';
+  $('#water-date').value = nowLocal();
+  if(DB.pon.length) $('#water-pon').value = DB.pon[0].id;
+  $('#water-save').textContent = '💾 บันทึกคุณภาพน้ำ';
+}
+
+/* ================= Analytics ================= */
+function pondStats(id){
+  const feeds = DB.feed.filter(f=>f.pon===id);
+  const grows = DB.grow.filter(g=>g.pon===id).sort((a,b)=>a.date.localeCompare(b.date));
+  const healths = DB.health.filter(h=>h.pon===id);
+  const pon = DB.pon.find(p=>p.id===id) || {};
+
+  const feedKg = feeds.reduce((s,f)=>s+f.qty, 0);
+  const feedCost = feeds.reduce((s,f)=>s+f.cost, 0);
+  const died = healths.filter(h=>h.type==='ตาย').reduce((s,h)=>s+h.qty, 0);
+  const sick = healths.filter(h=>h.type==='ป่วย').reduce((s,h)=>s+h.qty, 0);
+
+  const startW = pon.w0 || (grows.length ? grows[0].w : 0);
+  const lastW = grows.length ? grows[grows.length-1].w : startW;
+  const lastQty = (grows.length && grows[grows.length-1].qty) ? grows[grows.length-1].qty : 0;
+
+  // ประมาณจำนวนคงเหลือ = ปล่อย - ตาย
+  const alive = Math.max(0, (pon.qty||0) - died);
+  const stockQty = lastQty || alive;
+
+  // ชีวมวลรวม (กก.) = น้ำหนักเฉลี่ย(ก.) x จำนวน(ตัว) / 1000
+  const biomass = lastW * stockQty / 1000;
+
+  // FCR = อาหารที่ให้(กก.) / น้ำหนักปลาที่เพิ่มขึ้น(กก.)
+  const gainKg = Math.max(0, (lastW - startW) * stockQty / 1000);
+  const fcr = gainKg > 0 ? feedKg / gainKg : null;
+
+  const survival = (pon.qty||0) > 0 ? (stockQty / pon.qty) * 100 : null;
+  const adg = grows.length >= 2
+      ? (()=>{ const d1=new Date(grows[0].date), d2=new Date(grows[grows.length-1].date);
+               const days=Math.max(1,Math.round((d2-d1)/86400000));
+               return (grows[grows.length-1].w - grows[0].w)/days; })()
+      : null;
+
+  return { pon, feedKg, feedCost, died, sick, startW, lastW, stockQty, biomass, fcr, survival, adg,
+           growCount: grows.length, feedCount: feeds.length,
+           lastDate: grows.length ? grows[grows.length-1].date : (feeds.length ? feeds[feeds.length-1].date : null) };
+}
+
+/* ================= Render helpers ================= */
+function fillPondSelects(){
+  const opts = DB.pon.length
+    ? DB.pon.map(p=>`<option value="${p.id}">${esc(p.name)} — ${esc(p.species)}</option>`).join('')
+    : '<option value="">-- ยังไม่มีบ่อเลี้ยง --</option>';
+  ['#feed-pon','#grow-pon','#health-pon','#water-pon'].forEach(s=>{
+    const el = $(s), cur = el.value;
+    el.innerHTML = opts;
+    if(cur && DB.pon.some(p=>p.id===cur)) el.value = cur;
+  });
+}
+
+function renderDashboard(){
+  const now = new Date();
+  const monthKey = now.toLocaleDateString('sv-SE').slice(0,7);
+
+  const totalQty = DB.pon.reduce((s,p)=>s+(p.qty||0),0);
+  const totalDied = DB.health.filter(h=>h.type==='ตาย').reduce((s,h)=>s+h.qty,0);
+  const totalFeed = DB.feed.reduce((s,f)=>s+f.qty,0);
+  let gainTotal = 0;
+  DB.pon.forEach(p=>{
+    const st = pondStats(p.id);
+    gainTotal += Math.max(0,(st.lastW - st.startW) * st.stockQty / 1000);
+  });
+  const stock = DB.pon.reduce((s,p)=>s+pondStats(p.id).stockQty,0);
+
+  $('#s-pon').textContent = fmt(DB.pon.length,0);
+  $('#s-pon-sub').textContent = DB.pon.length ? 'ชนิดปลา: ' + [...new Set(DB.pon.map(p=>p.species))].join(', ') : 'ยังไม่มีข้อมูล';
+  $('#s-fish').textContent = fmt(stock,0);
+  $('#s-fish-sub').textContent = 'ปล่อยรวม ' + fmt(totalQty,0) + ' ตัว';
+  $('#s-feed').textContent = fmt(totalFeed,2);
+  $('#s-feed-sub').textContent = 'ค่าใช้จ่ายอาหาร ' + fmt(DB.feed.reduce((s,f)=>s+f.cost,0),0) + ' บาท';
+  $('#s-die').textContent = fmt(totalDied,0);
+  $('#s-die-sub').textContent = 'อัตราการตาย ' + (totalQty ? fmt(totalDied/totalQty*100,2) : '0.00') + '%';
+  $('#s-fcr').textContent = gainTotal > 0 ? fmt(totalFeed/gainTotal,2) : '-';
+
+  const all = [
+    ...DB.feed.map(x=>({d:x.date, t:`ให้อาหาร ${fmt(x.qty,2)} กก. ที่ ${ponName(x.pon)}`})),
+    ...DB.grow.map(x=>({d:x.date, t:`ชั่งน้ำหนัก ${fmt(x.w,1)} ก./ตัว ที่ ${ponName(x.pon)}`})),
+    ...DB.health.map(x=>({d:x.date, t:`${x.type} ${x.qty?fmt(x.qty,0)+' ตัว ':''}ที่ ${ponName(x.pon)}`})),
+    ...DB.water.map(x=>({d:(x.date||'').slice(0,10), t:`ตรวจคุณภาพน้ำ ที่ ${ponName(x.pon)}`}))
+  ].filter(x=>x.d).sort((a,b)=>b.d.localeCompare(a.d));
+  if(all.length){
+    $('#s-last').textContent = all[0].d;
+    $('#s-last-sub').textContent = all[0].t;
+  } else {
+    $('#s-last').textContent = '-';
+    $('#s-last-sub').textContent = 'ยังไม่มีบันทึก';
+  }
+
+  const body = $('#dash-body');
+  body.innerHTML = DB.pon.map(p=>{
+    const st = pondStats(p.id);
+    let status = '<span class="pill ok">ปกติ</span>';
+    const recentDie = DB.health.filter(h=>h.pon===p.id && h.type==='ตาย')
+                       .sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const recentWater = DB.water.filter(w=>w.pon===p.id)
+                       .sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+    if(recentWater && ((recentWater.ph!==null && (recentWater.ph<6.5||recentWater.ph>9)) ||
+                       (recentWater.do!==null && recentWater.do<3) ||
+                       (recentWater.nh3!==null && recentWater.nh3>1))){
+      status = '<span class="pill bad">น้ำมีปัญหา</span>';
+    } else if(recentDie && recentDie.date >= new Date(Date.now()-3*86400000).toLocaleDateString('sv-SE')){
+      status = '<span class="pill warn">มีการตายล่าสุด</span>';
+    }
+    const wr = st.survival!==null ? st.survival : 0;
+    return `<tr>
+      <td><b>${esc(p.name)}</b></td>
+      <td>${esc(p.species)}</td>
+      <td>${fmt(p.qty,0)}</td>
+      <td>${fmt(st.stockQty,0)}</td>
+      <td>${st.lastW?fmt(st.lastW,1)+' ก.':'—'}</td>
+      <td>${fmt(st.feedKg,2)} กก.</td>
+      <td>
+        <div class="row"><span>${st.survival!==null?fmt(wr,1)+'%':'—'}</span></div>
+        <div class="bar"><i style="width:${Math.min(100,wr)}%"></i></div>
+      </td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+  $('#dash-empty').style.display = DB.pon.length ? 'none' : 'block';
+  return monthKey;
+}
+
+function renderPon(){
+  $('#pon-body').innerHTML = DB.pon.map(p=>`<tr>
+    <td><b>${esc(p.name)}</b></td>
+    <td>${esc(p.species)}</td>
+    <td>${p.area?fmt(p.area,2):'—'}</td>
+    <td>${fmt(p.qty,0)}</td>
+    <td>${p.w0?fmt(p.w0,1):'—'}</td>
+    <td>${p.date?esc(p.date):'—'}</td>
+    <td>${esc(p.note||'—')}</td>
+    <td class="row">
+      <button class="btn sm ghost" onclick="editPon('${p.id}')">แก้ไข</button>
+      <button class="btn sm red" onclick="delPon('${p.id}')">ลบ</button>
+    </td>
+  </tr>`).join('');
+  $('#pon-empty').style.display = DB.pon.length ? 'none' : 'block';
+}
+
+function renderFeed(){
+  const list = [...DB.feed].sort((a,b)=>b.date.localeCompare(a.date));
+  const total = list.reduce((s,f)=>s+f.qty,0);
+  $('#feed-sum').textContent = `— รวม ${fmt(total,2)} กก. / ${fmt(list.reduce((s,f)=>s+f.cost,0),0)} บาท`;
+  $('#feed-body').innerHTML = list.map(f=>`<tr>
+    <td>${esc(f.date)}</td>
+    <td>${esc(ponName(f.pon))}</td>
+    <td><span class="pill info">${esc(f.meal)}</span></td>
+    <td>${esc(f.brand||'—')}</td>
+    <td><b>${fmt(f.qty,2)}</b></td>
+    <td>${f.cost?fmt(f.cost,0):'—'}</td>
+    <td>${esc(f.note||'—')}</td>
+    <td class="row">
+      <button class="btn sm ghost" onclick="editFeed('${f.id}')">แก้ไข</button>
+      <button class="btn sm red" onclick="delRec('feed','${f.id}')">ลบ</button>
+    </td>
+  </tr>`).join('');
+  $('#feed-empty').style.display = list.length ? 'none' : 'block';
+}
+
+function renderGrow(){
+  const list = [...DB.grow].sort((a,b)=>b.date.localeCompare(a.date));
+  $('#grow-body').innerHTML = list.map(g=>{
+    const q = g.qty || DB.pon.find(p=>p.id===g.pon)?.qty || 0;
+    return `<tr>
+      <td>${esc(g.date)}</td>
+      <td>${esc(ponName(g.pon))}</td>
+      <td><b>${fmt(g.w,1)}</b></td>
+      <td>${g.len?fmt(g.len,1):'—'}</td>
+      <td>${q?fmt(q,0):'—'}</td>
+      <td>${fmt(g.w*q/1000,2)}</td>
+      <td>${esc(g.note||'—')}</td>
+      <td class="row">
+        <button class="btn sm ghost" onclick="editGrow('${g.id}')">แก้ไข</button>
+        <button class="btn sm red" onclick="delRec('grow','${g.id}')">ลบ</button>
+      </td>
+    </tr>`;
+  }).join('');
+  $('#grow-empty').style.display = list.length ? 'none' : 'block';
+}
+
+function renderHealth(){
+  const list = [...DB.health].sort((a,b)=>b.date.localeCompare(a.date));
+  const typePill = t => t==='ตาย' ? 'bad' : t==='ป่วย' ? 'warn' : 'info';
+  $('#health-body').innerHTML = list.map(h=>`<tr>
+    <td>${esc(h.date)}</td>
+    <td>${esc(ponName(h.pon))}</td>
+    <td><span class="pill ${typePill(h.type)}">${esc(h.type)}</span></td>
+    <td>${h.qty?fmt(h.qty,0):'—'}</td>
+    <td>${esc(h.cause||'—')}</td>
+    <td>${esc(h.fix||'—')}</td>
+    <td>${esc(h.note||'—')}</td>
+    <td class="row">
+      <button class="btn sm ghost" onclick="editHealth('${h.id}')">แก้ไข</button>
+      <button class="btn sm red" onclick="delRec('health','${h.id}')">ลบ</button>
+    </td>
+  </tr>`).join('');
+  $('#health-empty').style.display = list.length ? 'none' : 'block';
+}
+
+function waterStatus(w){
+  const bad = (w.ph!==null && (w.ph<6.5||w.ph>9)) || (w.do!==null && w.do<3) || (w.nh3!==null && w.nh3>1);
+  const watch = (w.temp!==null && (w.temp<25||w.temp>32)) || (w.ph!==null && (w.ph<7||w.ph>8.5)) || (w.do!==null && w.do<4);
+  return bad ? '<span class="pill bad">ควรแก้ไข</span>' : watch ? '<span class="pill warn">เฝ้าระวัง</span>' : '<span class="pill ok">เหมาะสม</span>';
+}
+function renderWater(){
+  const list = [...DB.water].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  $('#water-body').innerHTML = list.map(w=>`<tr>
+    <td>${esc((w.date||'').replace('T',' '))}</td>
+    <td>${esc(ponName(w.pon))}</td>
+    <td>${w.temp!==null?fmt(w.temp,1)+' °C':'—'}</td>
+    <td>${w.ph!==null?fmt(w.ph,2):'—'}</td>
+    <td>${w.do!==null?fmt(w.do,2):'—'}</td>
+    <td>${w.nh3!==null?fmt(w.nh3,2):'—'}</td>
+    <td>${waterStatus(w)}</td>
+    <td>${esc(w.note||'—')}</td>
+    <td class="row">
+      <button class="btn sm ghost" onclick="editWater('${w.id}')">แก้ไข</button>
+      <button class="btn sm red" onclick="delRec('water','${w.id}')">ลบ</button>
+    </td>
+  </tr>`).join('');
+  $('#water-empty').style.display = list.length ? 'none' : 'block';
+}
+
+function renderCounts(){
+  $('#count-pon').textContent = 'บ่อ: ' + DB.pon.length;
+  $('#count-feed').textContent = 'อาหาร: ' + DB.feed.length;
+  $('#count-grow').textContent = 'เติบโต: ' + DB.grow.length;
+  $('#count-health').textContent = 'สุขภาพ: ' + DB.health.length;
+  $('#count-water').textContent = 'น้ำ: ' + DB.water.length;
+}
+
+function renderAll(){
+  fillPondSelects();
+  renderDashboard();
+  renderPon(); renderFeed(); renderGrow(); renderHealth(); renderWater();
+  renderCounts();
+}
+
+/* ================= Edit / Delete (global for inline onclick) ================= */
+function editPon(id){
+  const p = DB.pon.find(x=>x.id===id); if(!p) return;
+  $('#pon-id').value = p.id; $('#pon-name').value = p.name; $('#pon-species').value = p.species;
+  $('#pon-area').value = p.area || ''; $('#pon-qty').value = p.qty; $('#pon-w0').value = p.w0 || '';
+  $('#pon-date').value = p.date || ''; $('#pon-note').value = p.note || '';
+  $('#pon-save').textContent = '💾 อัปเดตบ่อ';
+  switchTab('pon'); window.scrollTo({top:0,behavior:'smooth'});
+}
+function editFeed(id){
+  const f = DB.feed.find(x=>x.id===id); if(!f) return;
+  $('#feed-id').value=f.id; $('#feed-pon').value=f.pon; $('#feed-date').value=f.date;
+  $('#feed-meal').value=f.meal; $('#feed-brand').value=f.brand||''; $('#feed-qty').value=f.qty;
+  $('#feed-cost').value=f.cost||''; $('#feed-note').value=f.note||'';
+  $('#feed-save').textContent='💾 อัปเดตอาหาร';
+  switchTab('feed'); window.scrollTo({top:0,behavior:'smooth'});
+}
+function editGrow(id){
+  const g = DB.grow.find(x=>x.id===id); if(!g) return;
+  $('#grow-id').value=g.id; $('#grow-pon').value=g.pon; $('#grow-date').value=g.date;
+  $('#grow-w').value=g.w; $('#grow-qty').value=g.qty||''; $('#grow-len').value=g.len||''; $('#grow-note').value=g.note||'';
+  $('#grow-save').textContent='💾 อัปเดตการเติบโต';
+  switchTab('grow'); window.scrollTo({top:0,behavior:'smooth'});
+}
+function editHealth(id){
+  const h = DB.health.find(x=>x.id===id); if(!h) return;
+  $('#health-id').value=h.id; $('#health-pon').value=h.pon; $('#health-date').value=h.date;
+  $('#health-type').value=h.type; $('#health-qty').value=h.qty||''; $('#health-cause').value=h.cause||'';
+  $('#health-fix').value=h.fix||''; $('#health-note').value=h.note||'';
+  $('#health-save').textContent='💾 อัปเดตสุขภาพ';
+  switchTab('health'); window.scrollTo({top:0,behavior:'smooth'});
+}
+function editWater(id){
+  const w = DB.water.find(x=>x.id===id); if(!w) return;
+  $('#water-id').value=w.id; $('#water-pon').value=w.pon; $('#water-date').value=w.date||'';
+  $('#water-temp').value=w.temp===null?'':w.temp; $('#water-ph').value=w.ph===null?'':w.ph;
+  $('#water-do').value=w.do===null?'':w.do; $('#water-nh3').value=w.nh3===null?'':w.nh3;
+  $('#water-note').value=w.note||'';
+  $('#water-save').textContent='💾 อัปเดตคุณภาพน้ำ';
+  switchTab('water'); window.scrollTo({top:0,behavior:'smooth'});
+}
+function delRec(bucket, id){
+  if(!confirm('ยืนยันการลบบันทึกนี้?')) return;
+  DB[bucket] = DB[bucket].filter(x=>x.id!==id);
+  save(); renderAll(); toast('ลบบันทึกแล้ว');
+}
+function delPon(id){
+  const used = ['feed','grow','health','water'].some(b=>DB[b].some(x=>x.pon===id));
+  const msg = used
+    ? 'บ่อนี้มีบันทึกอาหาร/เติบโต/สุขภาพ/น้ำอยู่ — ลบบ่อและบันทึกทั้งหมดที่เกี่ยวข้องหรือไม่?'
+    : 'ยืนยันการลบบ่อนี้?';
+  if(!confirm(msg)) return;
+  DB.pon = DB.pon.filter(p=>p.id!==id);
+  ['feed','grow','health','water'].forEach(b=>{ DB[b] = DB[b].filter(x=>x.pon!==id); });
+  save(); renderAll(); toast('ลบบ่อและข้อมูลที่เกี่ยวข้องแล้ว');
+}
+function switchTab(name){
+  const b = document.querySelector(`nav.tabs button[data-tab="${name}"]`);
+  if(b) b.click();
+}
+
+/* ================= Export / Import / Print ================= */
+function download(filename, text, type){
+  const blob = new Blob([text], {type: type || 'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+$('#btn-export').addEventListener('click', ()=>{
+  download(`fish-farm-backup-${todayStr()}.json`, JSON.stringify(DB, null, 2), 'application/json');
+  toast('ส่งออกข้อมูล JSON แล้ว');
+});
+$('#btn-import').addEventListener('click', ()=> $('#file-import').click());
+$('#file-import').addEventListener('change', ev=>{
+  const f = ev.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      if(!d || typeof d !== 'object') throw new Error('รูปแบบไม่ถูกต้อง');
+      const merged = Object.assign(emptyDB(), d);
+      if(!confirm('นำเข้าข้อมูลจะแทนที่ข้อมูลปัจจุบันทั้งหมด ยืนยันหรือไม่?')) return;
+      DB = merged; save(); renderAll(); toast('นำเข้าข้อมูลสำเร็จ');
+    }catch(err){
+      alert('ไฟล์ JSON ไม่ถูกต้อง: ' + err.message);
+    }
+  };
+  r.readAsText(f, 'utf-8');
+  ev.target.value = '';
+});
+$('#btn-csv').addEventListener('click', ()=>{
+  const rows = [['ประเภท','วันที่','บ่อ','รายละเอียด1','รายละเอียด2','ค่า1','ค่า2','หมายเหตุ']];
+  DB.feed.forEach(f=>rows.push(['อาหาร',f.date,ponName(f.pon),'มื้อ '+f.meal,f.brand||'',f.qty,f.cost,f.note||'']));
+  DB.grow.forEach(g=>rows.push(['เติบโต',g.date,ponName(g.pon),'น้ำหนัก '+g.w+' ก./ตัว',g.len?'ยาว '+g.len+' ซม.':'',g.qty, (g.w*(g.qty||0)/1000).toFixed(2), g.note||'']));
+  DB.health.forEach(h=>rows.push(['สุขภาพ',h.date,ponName(h.pon),h.type,h.cause||'',h.qty,'',h.fix||''+' '+ (h.note||'')]));
+  DB.water.forEach(w=>rows.push(['น้ำ',(w.date||'').replace('T',' '),ponName(w.pon),
+      `pH ${w.ph===null?'-':w.ph}`, `DO ${w.do===null?'-':w.do}`, w.temp===null?'':w.temp, w.nh3===null?'':w.nh3, w.note||'']));
+  const csv = '\uFEFF' + rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  download(`fish-farm-${todayStr()}.csv`, csv, 'text/csv;charset=utf-8');
+  toast('ส่งออก CSV แล้ว');
+});
+$('#btn-clear').addEventListener('click', ()=>{
+  if(!confirm('ล้างข้อมูลทั้งหมดถาวร? (แนะนำให้ Export สำรองก่อน)')) return;
+  if(!confirm('ยืนยันอีกครั้ง: ข้อมูลทั้งหมดจะหายไป')) return;
+  DB = emptyDB(); save(); renderAll(); toast('ล้างข้อมูลทั้งหมดแล้ว');
+});
+
+$('#btn-print').addEventListener('click', ()=>{
+  const now = new Date();
+  let html = `<h2 style="margin-bottom:8px">รายงานสรุปการเลี้ยงปลา</h2>
+    <p style="font-size:12px;color:#555;margin-bottom:14px">ออกรายงานเมื่อ ${now.toLocaleString('th-TH')}</p>`;
+  if(!DB.pon.length){
+    html += '<p>ยังไม่มีข้อมูลบ่อเลี้ยง</p>';
+  } else {
+    const total = DB.feed.reduce((s,f)=>s+f.qty,0);
+    const cost = DB.feed.reduce((s,f)=>s+f.cost,0);
+    const died = DB.health.filter(h=>h.type==='ตาย').reduce((s,h)=>s+h.qty,0);
+    html += `<p><b>สรุปรวม:</b> บ่อ ${DB.pon.length} บ่อ | อาหารที่ใช้ ${fmt(total,2)} กก. |
+      ค่าอาหาร ${fmt(cost,0)} บาท | ปลาตายสะสม ${fmt(died,0)} ตัว</p>`;
+    html += `<table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px">
+      <thead><tr style="background:#eef">
+      <th style="border:1px solid #999;padding:6px">บ่อ</th>
+      <th style="border:1px solid #999;padding:6px">ชนิดปลา</th>
+      <th style="border:1px solid #999;padding:6px">ปล่อย(ตัว)</th>
+      <th style="border:1px solid #999;padding:6px">คงเหลือ(ตัว)</th>
+      <th style="border:1px solid #999;padding:6px">น้ำหนักเฉลี่ย(ก.)</th>
+      <th style="border:1px solid #999;padding:6px">อาหาร(กก.)</th>
+      <th style="border:1px solid #999;padding:6px">FCR</th>
+      <th style="border:1px solid #999;padding:6px">รอด(%)</th></tr></thead><tbody>`;
+    DB.pon.forEach(p=>{
+      const s = pondStats(p.id);
+      html += `<tr>
+        <td style="border:1px solid #999;padding:6px">${esc(p.name)}</td>
+        <td style="border:1px solid #999;padding:6px">${esc(p.species)}</td>
+        <td style="border:1px solid #999;padding:6px">${fmt(p.qty,0)}</td>
+        <td style="border:1px solid #999;padding:6px">${fmt(s.stockQty,0)}</td>
+        <td style="border:1px solid #999;padding:6px">${s.lastW?fmt(s.lastW,1):'—'}</td>
+        <td style="border:1px solid #999;padding:6px">${fmt(s.feedKg,2)}</td>
+        <td style="border:1px solid #999;padding:6px">${s.fcr?fmt(s.fcr,2):'—'}</td>
+        <td style="border:1px solid #999;padding:6px">${s.survival!==null?fmt(s.survival,1):'—'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+  }
+  const area = $('#print-area');
+  area.innerHTML = html;
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if(win){
+    win.document.write(`<html lang="th"><head><meta charset="utf-8">
+      <title>รายงานการเลี้ยงปลา</title>
+      <style>body{font-family:"Sarabun","Segoe UI",Tahoma,sans-serif;padding:24px;color:#111}</style>
+      </head><body>${html}</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(()=>win.print(), 400);
+  } else {
+    window.print();
+  }
+  toast('สร้างรายงานสำหรับพิมพ์แล้ว');
+});
+
+/* ================= Demo data (ครั้งแรกที่เปิด) ================= */
+function seedIfEmpty(){
+  if(DB.pon.length) return;
+  const p1 = uid(), p2 = uid();
+  const d = k => { const x=new Date(); x.setDate(x.getDate()-k); return x.toLocaleDateString('sv-SE'); };
+  DB.pon.push(
+    { id:p1, name:'บ่อ 1', species:'ปลานิล', area:400, qty:2000, w0:5, date:d(60), note:'ระบบน้ำไหลผ่าน' },
+    { id:p2, name:'บ่อ 2', species:'ปลาดุก', area:250, qty:1500, w0:3, date:d(30), note:'บ่อซีเมนต์' }
+  );
+  [[p1,45,2.5],[p1,44,2.5],[p1,30,3],[p1,15,3.5],[p2,25,2],[p2,10,2.5]].forEach(([p,k,q])=>
+    DB.feed.push({ id:uid(), pon:p, date:d(k), meal:'เช้า', brand:'อาหารเม็ดลอย 30%', qty:q, cost:q*30, note:'' }));
+  DB.grow.push(
+    { id:uid(), pon:p1, date:d(55), w:20, qty:1990, len:9,  note:'สุ่มชั่ง 20 ตัว' },
+    { id:uid(), pon:p1, date:d(30), w:60, qty:1980, len:13, note:'สุ่มชั่ง 20 ตัว' },
+    { id:uid(), pon:p1, date:d(5),  w:150, qty:1965, len:18, note:'สุ่มชั่ง 20 ตัว' },
+    { id:uid(), pon:p2, date:d(5),  w:80, qty:1490, len:16, note:'สุ่มชั่ง 20 ตัว' }
+  );
+  DB.health.push(
+    { id:uid(), pon:p1, date:d(20), type:'ตาย', qty:15, cause:'ขาดออกซิเจนช่วงเช้ามืด', fix:'เพิ่มเครื่องตีน้ำ', note:'' },
+    { id:uid(), pon:p2, date:d(3),  type:'ป่วย', qty:10, cause:'ครีบเปื่อย', fix:'เปลี่ยนน้ำ 30% และใส่เกลือ', note:'' }
+  );
+  DB.water.push(
+    { id:uid(), pon:p1, date:d(6)+'T07:30', temp:29, ph:7.4, do:5.6, nh3:0.15, note:'ค่าปกติ' },
+    { id:uid(), pon:p1, date:d(2)+'T07:30', temp:31, ph:8.2, do:3.4, nh3:0.6,  note:'ฝนตกหนัก ควรเพิ่มอากาศ' },
+    { id:uid(), pon:p2, date:d(4)+'T17:00', temp:30, ph:7.8, do:4.5, nh3:0.25, note:'' }
+  );
+  save();
+}
+
+/* ================= Init ================= */
+seedIfEmpty();
+resetPon(); resetFeed(); resetGrow(); resetHealth(); resetWater();
+renderAll();
+
+window.editPon = editPon; window.editFeed = editFeed; window.editGrow = editGrow;
+window.editHealth = editHealth; window.editWater = editWater; window.delRec = delRec;
+window.delPon = delPon;
+</script>
+</body>
+</html>
